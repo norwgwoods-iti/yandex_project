@@ -1,9 +1,7 @@
 import time
+import logging
 
-from utilites.check_method import CheckMethod
-
-
-# from utilites.api import get_file_upload_status
+logger = logging.getLogger(__name__)
 
 def wait_for_upload_file(api_disk, href, timeout=30):
 
@@ -15,7 +13,7 @@ def wait_for_upload_file(api_disk, href, timeout=30):
 
         status = response.json()['status']
 
-        print(f'\nStatus: {status}')
+        logger.info(f'Status: {status}')
 
         if status == 'in_progress':
             pass

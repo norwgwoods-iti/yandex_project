@@ -1,26 +1,89 @@
+import requests
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CheckMethod:
 
     @staticmethod
-    def check_status_code(response, expected_status_code: int):
+    def method_format_response_in_json(response: requests.Response):
 
-        if response.status_code == expected_status_code:
-
-            print(f'{response.status_code} - {response.reason}')
-            print(f'Успешно! Код ответа совпадает с ожидаемым: {response.status_code}')
-
+        if isinstance(response, requests.Response):
+            response_json = response.json()
+        elif isinstance(response, dict):
+            response_json = response
         else:
-            raise AssertionError(
-                f"Ошибка! Ожидался код {expected_status_code}, "
-                f"сервер вернул {response.status_code} - ({response.reason}). "
-                f"Текст ответа: {response.text[:200]}"
+            raise TypeError(
+                f'Ожидался requests.Response или dict, а пришел - "{type(response).__name__}"'
             )
+        return response_json
+
+    @staticmethod
+    def check_status_code(response: requests.Response, expected_status_code: int):
+
+        assert response.status_code == expected_status_code, (
+            f'Ошибка! Ожидался код {expected_status_code}, '
+            f'сервер вернул {response.status_code} - ({response.reason}). '
+            f'Текст ответа: {response.text[:200]}'
+        )
+
+        logger.info(f'%s - %s\nУспешно! Код ответа совпадает с ожидаемым: %s', response.status_code, response.reason, expected_status_code)
 
 
     @staticmethod
-    def check_filed_content(response, expected_filed_content: list):
+    def check_field(response: requests.Response, expected_field: dict):
+        response_json = CheckMethod.method_format_response_in_json(response)
 
-        response_json = response.json()
+        def field_path(data, prefix='rt'):
+            paths = set()
+            for k, v in data.items():
+                current_path = f'{prefix}.{k}' if prefix else k # если префикса нет - берем ключ
+                paths.add(current_path)
 
-        assert expected_filed_content in list(response_json), f'Значения полей не совпадают'
-        print(f'\nВсе поля присутствуют')
+                if isinstance(v, dict):
+                    paths |= field_path(v, prefix=current_path)
+
+            return paths
+
+        current_paths = field_path(response_json)
+        expected_paths = field_path(expected_field)
+        missing_fields = expected_paths - current_paths
+
+        if missing_fields:
+            errors = "\n".join(f"- {field}" for field in sorted(missing_fields))
+
+            raise AssertionError(
+                f'Ошибка валидации! В ответе обнаружены отсутствующие поля.\n'
+                f'Список пропущенных путей:\n'
+                f'{errors}'
+            )
+
+        logger.info('В ответе присутствуют все ожидаемые поля')
+
+
+    @staticmethod
+    def check_type_field_content(response: requests.Response, expected_field: dict):
+
+        response_json = CheckMethod.method_format_response_in_json(response)
+
+        def field_type(data, expected_structure: dict, prefix='rt'):
+            for key, expected_type in expected_structure.items():
+
+                current_path = f'{prefix}.{key}' if prefix else key
+
+                field_value = data[key]
+
+                if isinstance(expected_type, dict):
+                    assert isinstance(field_value, dict), (
+                        f"Поле '{current_path}' имеет тип {type(field_value).__name__}, "
+                        f"но ожидался вложенный объект (dict)"
+                    )
+                    field_type(data=field_value, expected_structure=expected_type, prefix=current_path)
+                else:
+                    assert isinstance(field_value, expected_type), (
+                        f'Поле "{current_path}" имеет "{type(field_value).__name__}" тип данных, ожидается - '
+                        f'"{expected_type.__name__}"'
+                    )
+
+        field_type(data=response_json, expected_structure=expected_field, prefix='rt')
+        logger.info('Все поля имеют ожидаемый тип данных')

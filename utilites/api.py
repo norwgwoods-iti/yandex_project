@@ -5,15 +5,19 @@ import requests
 from utilites.http_method import HttpMethod
 
 class YandexDiskAPI:
+    def __init__(self, base_url: str, http):
+        self.base_url = base_url
+        self.http = http
 
-    base_url = 'https://cloud-api.yandex.net'
+    # base_url = 'https://cloud-api.yandex.net'
 
     def get_disk_metadata(self):
 
         resource_url = '/v1/disk'
         url = self.base_url + resource_url
 
-        response = HttpMethod.get(url=url)
+        response = self.http.get(url=url)
+
         return response
 
 
@@ -26,7 +30,7 @@ class YandexDiskAPI:
             'path': path
         }
 
-        response = HttpMethod.get(
+        response = self.http.get(
             url=url,
             query_param=query_param
         )
@@ -44,10 +48,11 @@ class YandexDiskAPI:
             'url': href_file
         }
 
-        response = HttpMethod.post(
+        response = self.http.post(
             url=url,
             query_param=query_param
         )
+
         return response
 
 
@@ -60,17 +65,17 @@ class YandexDiskAPI:
             'path': path
         }
 
-        response = HttpMethod.put(
+        response = self.http.put(
             url=url,
             query_param=query_param
         )
+
         return response
 
 
-    @staticmethod
-    def get_file_upload_status(href):
+    def get_file_upload_status(self, href):
 
-        response = HttpMethod.get(url=href)
+        response = self.http.get(url=href)
 
         return response
 
@@ -85,8 +90,9 @@ class YandexDiskAPI:
             'path': path
         }
 
-        response = HttpMethod.delete(
+        response = self.http.delete(
             url=url,
             query_param=query_param
         )
+
         return response

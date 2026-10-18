@@ -3,12 +3,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def wait_for_upload_file(api_disk, href, timeout=30):
+def wait_for_upload_file(ya_disk, href, timeout=30):
 
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
 
-        response = api_disk.get_file_upload_status(href)
+        response = ya_disk.get_file_upload_status(href)
         response.raise_for_status()
 
         status = response.json()['status']

@@ -1,27 +1,26 @@
 import requests
-import os
-from dotenv import load_dotenv
+# import os
+# from dotenv import load_dotenv
 import logging
 # from utilites.check_method import CheckMethod
 
 logger = logging.getLogger(__name__)
-load_dotenv()
+# load_dotenv()
 
 class HttpMethod:
-    token = os.environ['OAUTH_TOKEN']
 
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': token
-    }
+    def __init__(self, session: requests.Session | None = None):
+        self.session = session or requests.Session()
 
-    cookies = {}
-
-    @staticmethod
-    def get(url, query_param: dict | None = None):
+    """ Метод GET """
+    def get(self, url, query_param: dict | None = None):
         logger.info('\n---> GET %s', url)
 
-        response = requests.get(url=url, params=query_param, headers=HttpMethod.headers, cookies=HttpMethod.cookies, timeout=(5, 30))
+        response = self.session.get(
+            url=url,
+            params=query_param,
+            timeout=(5, 30)
+        )
 
         logger.info(f'<--- STATUS %s [%.0fms]', response.status_code, response.elapsed.total_seconds() * 1000)
         if query_param:
@@ -30,11 +29,15 @@ class HttpMethod:
         return response
 
 
-    @staticmethod
-    def post(url, body: dict | None = None, query_param: dict | None = None):
+    def post(self, url, json: dict | None = None, query_param: dict | None = None):
         logger.info('\n---> POST %s', url)
 
-        response = requests.post(url=url, params=query_param, json=body, headers=HttpMethod.headers, cookies=HttpMethod.cookies)
+        response = self.session.post(
+            url=url,
+            params=query_param,
+            json=json,
+            timeout=(5, 30)
+        )
 
         logger.info(f'<--- STATUS %s [%.0fms]', response.status_code, response.elapsed.total_seconds() * 1000)
         if query_param:
@@ -43,11 +46,14 @@ class HttpMethod:
         return response
 
 
-    @staticmethod
-    def put(url, query_param: dict | None = None):
+    def put(self, url, json:dict | None = None, query_param: dict | None = None):
         logger.info('\n---> PUT %s', url)
 
-        response = requests.put(url=url, params=query_param, headers=HttpMethod.headers, cookies=HttpMethod.cookies)
+        response = self.session.put(url=url,
+            json=json,
+            params=query_param,
+            timeout=(5, 30)
+        )
 
         logger.info(f'<--- STATUS %s [%.0fms]', response.status_code, response.elapsed.total_seconds() * 1000)
         if query_param:
@@ -56,11 +62,15 @@ class HttpMethod:
         return response
 
 
-    @staticmethod
-    def delete(url, query_param: dict | None = None, body: dict | None = None):
+    def delete(self, url, query_param: dict | None = None, body: dict | None = None):
         logger.info('\n---> DELETE %s', url)
 
-        response = requests.delete(url=url, params=query_param, json=body, headers=HttpMethod.headers, cookies=HttpMethod.cookies, timeout=(5, 30))
+        response = self.session.delete(
+            url=url,
+            params=query_param,
+            json=body,
+            timeout=(5, 30)
+        )
 
         logger.info(f'<--- STATUS %s [%.0fms]', response.status_code, response.elapsed.total_seconds() * 1000)
         if query_param:

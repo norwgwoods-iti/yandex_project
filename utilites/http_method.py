@@ -1,11 +1,7 @@
 import requests
-# import os
-# from dotenv import load_dotenv
 import logging
-# from utilites.check_method import CheckMethod
 
 logger = logging.getLogger(__name__)
-# load_dotenv()
 
 class HttpMethod:
 

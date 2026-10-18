@@ -1,15 +1,9 @@
-from urllib import request
-
-import requests
-
-from utilites.http_method import HttpMethod
 
 class YandexDiskAPI:
     def __init__(self, base_url: str, http):
         self.base_url = base_url
         self.http = http
 
-    # base_url = 'https://cloud-api.yandex.net'
 
     def get_disk_metadata(self):
 

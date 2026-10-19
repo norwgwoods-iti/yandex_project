@@ -12,3 +12,4 @@ wheels/
 .env
 .idea
 .DS_Store
+tests/test1.py

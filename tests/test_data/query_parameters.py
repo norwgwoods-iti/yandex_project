@@ -23,12 +23,12 @@ CREATE_DIRECTORY_QUERY_PARAMETER = [
         'Music',
         id='Music_directory_create'
     ),
-    # pytest.param(
-    #     'Image',
-    #     id='Image_directory_create'
-    # ),
-    # pytest.param(
-    #     'Document',
-    #     id='Document_directory_create'
-    # ),
+    pytest.param(
+        'Image',
+        id='Image_directory_create'
+    ),
+    pytest.param(
+        'Document',
+        id='Document_directory_create'
+    ),
 ]

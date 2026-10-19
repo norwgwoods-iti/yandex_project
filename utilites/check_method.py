@@ -19,9 +19,9 @@ class CheckMethod:
         return response_json
 
     @staticmethod
-    def check_status_code(response: requests.Response, expected_status_code: int):
+    def check_status_code(response: requests.Response, expected_status_code):
 
-        assert response.status_code == expected_status_code, (
+        assert response.status_code in expected_status_code, (
             f'Ошибка! Ожидался код {expected_status_code}, '
             f'сервер вернул {response.status_code} - ({response.reason}). '
             f'Текст ответа: {response.text[:200]}'
@@ -87,3 +87,12 @@ class CheckMethod:
 
         field_type(data=response_json, expected_structure=expected_field, prefix='rt')
         logger.info('Все поля имеют ожидаемый тип данных')
+
+
+    @staticmethod
+    def check_response(response: requests.Response, *, status_code = None, expected_field = None):
+        if status_code:
+            CheckMethod.check_status_code(response=response, expected_status_code=status_code)
+        if expected_field:
+            CheckMethod.check_field(response=response, expected_field=expected_field)
+            CheckMethod.check_type_field_content(response=response, expected_field=expected_field)

@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import uuid
 
 from utilites.api import YandexDiskAPI
+from utilites.check_method import CheckMethod
 from utilites.http_method import HttpMethod
 
 load_dotenv()
@@ -42,11 +43,12 @@ def ya_disk(base_url, http):
 
 @pytest.fixture
 def create_folder(ya_disk):
-    # path = f'{uuid.uuid4().hex[:8]}'
-    path = 'Music'
+    path = f'/autotest_{uuid.uuid4().hex[:8]}'
 
-    ya_disk.put_create_directory(path=path)
+    put_response = ya_disk.put_create_directory(path=path)
+    CheckMethod.check_response(response=put_response, status_code=201)
 
     yield path
 
-    ya_disk.delete_directory_or_file(path=path)
+    delete_response = ya_disk.delete_directory_or_file(path=path)
+    assert delete_response.status_code in (204, 202), delete_response.text
